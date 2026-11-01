@@ -1,61 +1,62 @@
-# 🧪 A/B Testing & Statistical Experimentation Platform
+# 🧪 Enterprise A/B Testing & Statistical Experimentation Platform
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://avijeet-ab-testing-platform.streamlit.app)
 [![Tests](https://img.shields.io/badge/pytest-9%20passed-brightgreen.svg)](tests/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An enterprise-grade A/B testing and statistical experimentation platform designed according to Google experimentation standards. Built on **290,584 verified user sessions** from an authentic e-commerce landing page conversion test, the platform bridges classical Frequentist hypothesis testing with Bayesian posterior modeling, sample size power calculations, and automated instrumentation guardrails.
+An enterprise-grade statistical experimentation platform modeled after Google's Experimentation Platform architecture. Built upon **290,584 verified user sessions** from an authentic e-commerce landing page conversion experiment, this platform unifies classical Frequentist hypothesis testing with Bayesian posterior updating, automated Sample Ratio Mismatch (SRM) auditing, and interactive pre-experiment power sizing.
 
 ---
 
 ## 🌐 Live Interactive Application
 
-Explore the deployed cloud dashboard with interactive hypothesis testing, Beta-Binomial posterior updates, and custom CSV upload capabilities:  
+Access the deployed cloud dashboard with interactive hypothesis testing, Beta-Binomial posterior updates, and custom CSV upload capabilities:  
 👉 **[Launch Live Platform](https://avijeet-ab-testing-platform.streamlit.app)**
 
 ---
 
-## 📸 Platform Architecture & Interface Preview
+## 📸 Architecture & Platform Interface
 
 ![Platform Preview](assets/preview.png)
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["1. Data Ingestion & Hygiene"]
-        Raw["Raw Sessions\n294,478 rows"] --> Hygiene["transform.py\nInstrumentation Mismatch Audit"]
-        Hygiene --> Dedupe["Deduplication\n290,584 Clean Sessions"]
+    subgraph DataIngestion ["1. Data Ingestion & Instrumentation Hygiene"]
+        Raw["Raw Session Stream\n(294,478 Events)"] --> Audit["Instrumentation Audit\n(Detect 3,893 Mismatches)"]
+        Audit --> Dedupe["First-Exposure Deduplication\n(290,584 Clean Cohort)"]
     end
 
-    subgraph Warehouse ["2. Relational Star Schema"]
-        Dedupe --> DB[("SQLite Warehouse\nab_testing.db")]
-        DB --> Users["dim_users\n(290k rows)"]
-        DB --> Dates["dim_dates\n(23 days)"]
-        DB --> Sessions["fact_sessions\n(290k rows)"]
-        DB --> Daily["agg_daily_metrics"]
+    subgraph RelationalWarehouse ["2. SQLite Star Schema Warehouse"]
+        Dedupe --> DB[("SQLite Database\nab_testing.db")]
+        DB --> Users["dim_users\n(user_id, group, page)"]
+        DB --> Dates["dim_dates\n(date_id, day, weekend)"]
+        DB --> Sessions["fact_sessions\n(session_id, user_id, date_id, converted)"]
+        DB --> Agg["agg_daily_metrics\n(longitudinal aggregates)"]
     end
 
-    subgraph TestingSuite ["3. Statistical Analysis Engine"]
-        Sessions --> Freq["Frequentist Engine\nChi2 · Two-Prop Z · Wilson CI · Cohen h"]
-        Sessions --> Bayes["Bayesian Engine\nBeta-Binomial · MC 100k · ROPE · Expected Loss"]
-        Sessions --> Power["Power Calculator\nSample Size · MDE Curves · Post-Hoc Power"]
-        Sessions --> Guard["Guardrails Engine\nDaily SRM Chi2 · Novelty/Primacy Bias"]
+    subgraph StatisticalEngines ["3. Statistical Analysis Engine"]
+        Sessions --> Freq["Frequentist Engine\n• Chi-Square Test (χ²)\n• Two-Proportion Z-Test\n• Wilson Score 95% CIs\n• Cohen's h Effect Size"]
+        Sessions --> Bayes["Bayesian Engine\n• Beta-Binomial Conjugate\n• Monte Carlo 100k Sampling\n• ROPE Practical Equivalence\n• Expected Loss / Risk Analysis"]
+        Sessions --> Power["Power & Sizing Solver\n• Two-Proportion Z Solver\n• MDE Sensitivity Curves\n• Post-Hoc Power Diagnosis"]
+        Sessions --> Guard["Guardrail Diagnostics\n• Daily SRM Chi-Square\n• Novelty & Primacy Audit\n• Day-of-Week Segmentation"]
     end
 
-    subgraph UI ["4. Interactive Streamlit Dashboard"]
-        Freq & Bayes & Power & Guard --> App["Multi-Page Web Application\nStreamlit Cloud Deployment"]
+    subgraph CloudUI ["4. Production Multi-Page Streamlit App"]
+        Freq & Bayes & Power & Guard --> App["Streamlit Cloud Dashboard\nLive Interactive Modules + CSV Uploader"]
     end
 ```
 
 ---
 
-## 📊 Dataset Provenance & Instrumentation Audit
+## 📊 Dataset Provenance & Instrumentation Hygiene
 
-- **Domain:** E-Commerce Landing Page Conversion Experiment (Control: Old Page vs Treatment: New Page)
-- **Time Horizon:** 2017-01-02 to 2017-01-24 (23 active calendar days)
-- **Raw Volume:** 294,478 recorded interactions
-- **Instrumentation Audit:**
-  - Standard logging pipeline revealed **3,893 mismatched records** (1.32%) where Control users were exposed to `new_page` or Treatment users were exposed to `old_page` due to dual-routing edge cases.
+- **Context:** E-Commerce Checkout / Landing Page Redesign Experiment (Control: Existing Baseline Page vs Treatment: Redesigned Page).
+- **Longitudinal Horizon:** 23 consecutive calendar days (January 2, 2017 to January 24, 2017).
+- **Total Raw Interactions:** 294,478 session logs.
+- **Instrumentation Audit & Dual-Exposure Leakage:**
+  - Standard logging pipeline revealed **3,893 corrupted interaction logs** (1.32%) where Control users were exposed to `new_page` or Treatment users were exposed to `old_page` due to dual-routing edge cases.
   - After isolating valid single exposures and deduplicating re-entrant user IDs, the clean analytical cohort contains **290,584 unique visitor sessions**.
   - **Sample Ratio Mismatch (SRM) Test:** $\chi^2 = 0.0045, p = 0.9468$ — confirmed unbiased 50/50 randomized traffic allocation.
 
@@ -63,8 +64,8 @@ flowchart TD
 
 ## 🔬 Statistical Methodology Comparison
 
-| Dimension | Frequentist Framework | Bayesian Framework |
-|---|---|---|
+| Dimension | Classical Frequentist Framework | Modern Bayesian Framework |
+|:---|:---|:---|
 | **Core Question** | "Assuming no difference ($H_0$), how rare is our data?" | "Given our observed data, what is the probability distribution of conversion rates?" |
 | **Primary Metric** | p-value ($\chi^2 = 1.7185, p = 0.1899$) | $P(\text{Treatment} > \text{Control}) = 9.36\%$ |
 | **Uncertainty Bounds** | 95% Wilson Score Confidence Interval | 95% Posterior Credible Interval |
@@ -96,13 +97,13 @@ EXPERIMENT OUTCOME: ROLLOUT REJECTED — MAINTAIN CONTROL LANDING PAGE
 
 ---
 
-## 🗂️ Project Structure
+## 🗂️ Project Directory Structure
 
 ```
 ab-testing-experimentation-platform/
 ├── assets/
 │   ├── generate_preview.png             # Script to build graphic assets
-│   └── preview.png                      # Dashboard architecture preview
+│   └── preview.png                      # High-resolution dashboard preview
 ├── data/
 │   ├── raw/
 │   │   └── ab_data.csv                  # 294,478 raw session events
@@ -132,6 +133,7 @@ ab-testing-experimentation-platform/
 │   └── test_smoke.py                    # App entrypoint and page smoke tests
 ├── requirements.txt
 ├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
