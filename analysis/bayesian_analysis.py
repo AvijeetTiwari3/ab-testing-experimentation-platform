@@ -34,8 +34,9 @@ def compute_bayesian_metrics(
         """, conn)
         conn.close()
 
-    control_mask = df["assigned_group"] == "control"
-    treatment_mask = df["assigned_group"] == "treatment"
+    group_col = "assigned_group" if "assigned_group" in df.columns else "group"
+    control_mask = df[group_col] == "control"
+    treatment_mask = df[group_col] == "treatment"
 
     n_control = int(control_mask.sum())
     n_treatment = int(treatment_mask.sum())

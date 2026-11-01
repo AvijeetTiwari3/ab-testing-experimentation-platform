@@ -24,7 +24,10 @@ st.set_page_config(page_title="Bayesian Analysis", page_icon="🎲", layout="wid
 
 @st.cache_data
 def load_data():
-    return pd.read_parquet(PROCESSED_DATA_PATH)
+    df = pd.read_parquet(PROCESSED_DATA_PATH)
+    if "group" in df.columns and "assigned_group" not in df.columns:
+        df["assigned_group"] = df["group"]
+    return df
 
 
 def main():
