@@ -17,9 +17,13 @@ Access the deployed cloud dashboard with interactive hypothesis testing, Beta-Bi
 
 ---
 
-## 📸 Architecture & Platform Interface
+## 📸 Platform Analytics Interface
 
 ![Platform Preview](assets/preview.png)
+
+---
+
+## 🏗️ End-to-End System Architecture & Data Flowchart
 
 ```mermaid
 flowchart TD
